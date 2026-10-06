@@ -1,24 +1,34 @@
-# ContaClaraAI v0.6 — Múltiplos controles e compartilhamento
+# ContaClaraAI v0.7.1 — Fundação SaaS Multi-tenant (Migration Fix)
+
+Baseada na v0.6.1, preservando o menu mobile.
 
 ## Novidades
-- Vários controles por usuário (ex.: Pai - Despesas, Casa, Viagem, Empresa).
-- Seletor de controle na barra lateral; Dashboard, despesas, comprovantes e relatórios passam a usar somente o controle ativo.
-- Tela **Controles** para criar e editar controles.
-- Compartilhamento por e-mail com papéis: Administrador, Editor e Visualizador.
-- Convites pendentes são ativados automaticamente quando o usuário entra com o mesmo e-mail no ContaClaraAI.
-- RLS do Supabase atualizada para acesso por controle.
-- Comprovantes de controles compartilhados podem ser visualizados pelos membros autorizados.
+- Organizações / Workspaces acima dos controles.
+- Um usuário pode ser proprietário ou membro de várias organizações.
+- Seletor de organização na sidebar desktop/mobile.
+- Controles e categorias isolados por `organizacao_id`.
+- Membros da organização com papéis Administrador, Editor e Visualizador.
+- Convites pendentes são ativados automaticamente quando o e-mail convidado entra no sistema.
+- Configuração de identidade passa a pertencer à organização selecionada.
+- RLS multi-tenant no Supabase.
+- Migração dos controles, categorias, configurações e membros já existentes para um workspace padrão, sem apagar lançamentos.
 
-## Instalação
-1. No Supabase > SQL Editor, execute `supabase/schema.sql` completo.
-2. Substitua os arquivos da aplicação pela v0.6.
-3. Rode `npm install` e `npm run build`.
-4. Faça commit/push para o GitHub; a Vercel fará o deploy.
+## Antes de publicar
+1. Faça backup do banco Supabase (recomendado para qualquer migração estrutural).
+2. No Supabase > SQL Editor, execute `supabase/schema.sql` completo.
+3. Confirme que existem as tabelas `organizacoes` e `organizacao_membros` e que `controles`/`categorias` possuem `organizacao_id`.
+4. Rode `npm install` e `npm run build` localmente.
+5. Faça commit/push para a Vercel.
 
-## Papéis
-- **Proprietário**: cria/edita o controle, convida/remove membros e gerencia despesas.
-- **Administrador**: consulta e altera despesas do controle.
-- **Editor**: consulta e altera despesas do controle.
-- **Visualizador**: somente consulta os dados do controle.
+## Modelo
+`Usuário -> Organização -> Controles -> Despesas`
 
-> Nesta versão, o convite é interno: o e-mail convidado precisa criar/usar uma conta no ContaClaraAI com o mesmo endereço. O acesso é ativado no próximo login/carregamento. O envio de e-mail transacional de convite pode ser adicionado depois.
+A organização também contém membros, categorias e identidade visual.
+
+## Observação
+A v0.7 mantém `controle_membros` por compatibilidade com a v0.6. O novo compartilhamento SaaS deve ser feito preferencialmente em **Organizações**, pois o acesso é herdado pelos controles do workspace.
+
+## Correção v0.7.1
+- `schema.sql` idempotente para policies: toda `CREATE POLICY` é precedida por `DROP POLICY IF EXISTS`.
+- Corrige o erro PostgreSQL `42710` ao reaplicar o script após uma execução parcial da v0.7.
+- Pode ser executado novamente sem remover manualmente as policies já criadas.
