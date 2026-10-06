@@ -8,3 +8,25 @@
 
 /* v0.6 - multiplos controles e membros */
 .controlPicker{display:grid;gap:7px}.controlPicker select{width:100%;background:#173f65;color:#fff;border:1px solid #31597e;padding:8px;border-radius:8px;font-weight:700}.controlManage{border:0;background:transparent;color:#9dc9f3;text-align:left;padding:0;font-size:11px;cursor:pointer}.controlHeader{margin-bottom:16px}.controlHeader p{margin:4px 0 0;color:#718096}.controlCards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}.controlCard{display:grid;gap:7px;text-align:left;border:1px solid #dce6f0;background:#fff;border-radius:12px;padding:16px;cursor:pointer;color:#21354b}.controlCard:hover,.controlCard.selected{border-color:var(--primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--primary) 12%,transparent)}.controlCard span{font-size:10px;text-transform:uppercase;color:#718096}.controlCard b{font-size:17px}.controlCard small{color:#7c8b9c}.controlAdmin{align-items:start}.inviteForm{display:grid;grid-template-columns:1.5fr 1fr auto;gap:10px;align-items:end;margin-bottom:16px}.inviteForm .field{margin:0}.memberList{display:grid;gap:8px}.memberRow{display:grid;grid-template-columns:38px minmax(0,1fr) 130px auto;gap:10px;align-items:center;border-top:1px solid #edf1f6;padding:10px 0}.memberRow .avatar{width:36px;height:36px}.memberRow b,.memberRow small{display:block;overflow:hidden;text-overflow:ellipsis}.memberRow small{color:#7c8b9c;margin-top:2px}.ownerRow{grid-template-columns:38px 1fr}.memberRemove{border:0;background:#fff0f1;color:#c93646;border-radius:7px;padding:8px;cursor:pointer}.roleBadge{font-size:11px;background:#edf4ff;padding:6px 8px;border-radius:20px;text-transform:capitalize}@media(max-width:1000px){.controlCards{grid-template-columns:1fr 1fr}.inviteForm{grid-template-columns:1fr}.memberRow{grid-template-columns:38px 1fr}.memberRow select,.memberRow .roleBadge,.memberRemove{grid-column:2}}@media(max-width:600px){.controlCards{grid-template-columns:1fr}}
+
+/* v0.6.1 - navegação responsiva */
+.mobileTopbar,.mobileBackdrop,.mobileClose{display:none}
+@media(max-width:900px){
+ body{padding-top:66px}
+ .mobileTopbar{display:flex;position:fixed;z-index:1200;left:0;right:0;top:0;height:66px;background:#0d2745;color:#fff;align-items:center;padding:10px 14px;gap:12px;box-shadow:0 2px 12px #0d274533}
+ .mobileMenuButton{display:grid;place-items:center;width:42px;height:42px;border:1px solid #31597e;border-radius:10px;background:#173858;color:#fff;font-size:24px;cursor:pointer}
+ .mobileBrand{display:flex;align-items:center;gap:9px;min-width:0}.mobileBrand .logo,.mobileBrand .brandLogoImg{width:40px;height:40px;flex:0 0 40px}.mobileBrand b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;font-size:17px}.mobileBrand small{display:block;color:#9db1c8;font-size:10px}
+ .shell aside{display:flex;position:fixed;z-index:1400;left:0;top:0;bottom:0;width:min(86vw,320px);transform:translateX(-105%);transition:transform .22s ease;box-shadow:8px 0 30px #071b2f55;overflow-y:auto}
+ .shell.mobileMenuOpen aside{transform:translateX(0)}
+ .mobileBackdrop{position:fixed;z-index:1300;inset:0;border:0;background:#071b2f88;cursor:pointer}
+ .shell.mobileMenuOpen .mobileBackdrop{display:block}
+ .mobileClose{display:grid;place-items:center;position:absolute;right:10px;top:10px;width:34px;height:34px;border:0;border-radius:9px;background:#ffffff16;color:#fff;font-size:26px;cursor:pointer}
+ aside .brand{padding-right:36px}
+ aside nav button{min-height:44px;font-size:15px}
+ aside .user{padding-bottom:10px}
+ main{padding:16px}
+ header{gap:12px;flex-direction:column}
+ header .top{width:100%;justify-content:flex-end}
+ header .top .primary{width:100%}
+}
+@media(max-width:480px){.mobileBrand b{max-width:170px}.cards{grid-template-columns:1fr}.sectionTitle{align-items:flex-start;flex-direction:column}.toolbar{align-items:stretch;flex-direction:column}}
