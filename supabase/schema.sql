@@ -98,3 +98,47 @@ drop policy if exists "categorias_update_own" on public.categorias;
 create policy "categorias_update_own" on public.categorias for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
 drop policy if exists "categorias_delete_own" on public.categorias;
 create policy "categorias_delete_own" on public.categorias for delete to authenticated using (auth.uid() = user_id);
+
+-- v0.5 - Configuracoes e identidade visual
+create table if not exists public.configuracoes (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade unique,
+  nome_empresa text not null default 'ContaClaraAI',
+  nome_exibicao text,
+  documento text,
+  email text,
+  telefone text,
+  cep text,
+  endereco text,
+  numero text,
+  complemento text,
+  bairro text,
+  cidade text,
+  uf varchar(2),
+  cor_primaria text not null default '#0877f9',
+  logo_path text,
+  logo_url text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.configuracoes enable row level security;
+drop policy if exists "configuracoes_select_own" on public.configuracoes;
+create policy "configuracoes_select_own" on public.configuracoes for select to authenticated using (auth.uid() = user_id);
+drop policy if exists "configuracoes_insert_own" on public.configuracoes;
+create policy "configuracoes_insert_own" on public.configuracoes for insert to authenticated with check (auth.uid() = user_id);
+drop policy if exists "configuracoes_update_own" on public.configuracoes;
+create policy "configuracoes_update_own" on public.configuracoes for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Logos não contêm dados financeiros e são públicos para renderização da identidade visual.
+insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types)
+values ('identidade','identidade',true,5242880,array['image/jpeg','image/png','image/webp','image/svg+xml'])
+on conflict (id) do update set public=true,file_size_limit=5242880,allowed_mime_types=array['image/jpeg','image/png','image/webp','image/svg+xml'];
+drop policy if exists "identidade_insert_own" on storage.objects;
+create policy "identidade_insert_own" on storage.objects for insert to authenticated
+with check (bucket_id='identidade' and (storage.foldername(name))[1]=(select auth.uid()::text));
+drop policy if exists "identidade_update_own" on storage.objects;
+create policy "identidade_update_own" on storage.objects for update to authenticated
+using (bucket_id='identidade' and owner_id=(select auth.uid()::text));
+drop policy if exists "identidade_delete_own" on storage.objects;
+create policy "identidade_delete_own" on storage.objects for delete to authenticated
+using (bucket_id='identidade' and owner_id=(select auth.uid()::text));

@@ -77,3 +77,9 @@ A tela **Importar WhatsApp** agora:
 
 ### Atualização
 Execute `npm install` para instalar `jszip`, depois `npm run build`.
+
+## v0.5 - Configurações e identidade visual
+
+Antes do deploy, execute novamente `supabase/schema.sql` no SQL Editor. A versão cria `public.configuracoes`, políticas RLS e o bucket público `identidade` para logotipos.
+
+A tela Configurações permite nome da empresa/organização, nome de exibição, cor principal, logotipo, CPF/CNPJ, e-mail, telefone/WhatsApp e endereço completo. A identidade é aplicada na barra lateral.
