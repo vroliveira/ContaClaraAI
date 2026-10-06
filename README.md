@@ -65,3 +65,15 @@ A tela **Importar WhatsApp** agora:
 5. Marque os lançamentos desejados e clique em **Importar selecionados**.
 
 > O parser não inventa valores ausentes no `.txt`. Se o WhatsApp exportou apenas `<imagem ocultada>` ou uma referência de PDF sem valor textual, o lançamento fica para conferência manual. Leitura automática do conteúdo de PDF/imagem por IA/OCR é a próxima camada.
+
+
+## v0.4 — Importação direta do ZIP do WhatsApp
+- Aceita o `.zip` gerado por **Exportar conversa > Incluir mídia**.
+- Extrai o ZIP no próprio navegador com JSZip; o ZIP bruto não é enviado ao servidor.
+- Localiza automaticamente o `.txt` da conversa e disponibiliza PDFs/imagens extraídos para associação.
+- Ignora diretórios internos e metadados comuns (`__MACOSX`, arquivos ocultos).
+- Mantém compatibilidade com seleção manual de `.txt`, PDF e imagens.
+- Quando o nome de um PDF citado no chat coincide com um arquivo dentro do ZIP, o comprovante é enviado ao Storage privado no momento da confirmação.
+
+### Atualização
+Execute `npm install` para instalar `jszip`, depois `npm run build`.
