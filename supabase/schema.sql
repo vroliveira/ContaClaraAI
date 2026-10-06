@@ -427,3 +427,10 @@ drop policy if exists "categorias_update_org" on public.categorias;
 create policy "categorias_update_org" on public.categorias for update to authenticated using (public.can_edit_org(organizacao_id)) with check (public.can_edit_org(organizacao_id));
 drop policy if exists "categorias_delete_org" on public.categorias;
 create policy "categorias_delete_org" on public.categorias for delete to authenticated using (public.can_admin_org(organizacao_id));
+
+-- v0.9 - Metadados de IA e identificador PIX para deteccao de duplicidade
+alter table public.despesas add column if not exists pix_transacao_id text;
+alter table public.despesas add column if not exists origem text not null default 'manual';
+alter table public.despesas add column if not exists ia_confianca smallint;
+alter table public.despesas add column if not exists ia_dados jsonb;
+create index if not exists despesas_controle_pix_idx on public.despesas(controle_id,pix_transacao_id) where pix_transacao_id is not null;

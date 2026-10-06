@@ -1,29 +1,23 @@
-# ContaClaraAI v0.8 — Prestação de Contas
+# ContaClaraAI v0.9 — ContaClara AI
 
-Baseada na v0.7.1 multi-tenant.
+Evolução da v0.8 com análise inteligente de comprovantes no fluxo de importação do WhatsApp.
 
 ## Novidades
-- Relatório por período no controle atual.
-- Cabeçalho com identidade e dados da organização.
-- Resumo: total, pago, pendente e quantidade de lançamentos.
-- Consolidação por categoria.
-- Conferência de comprovantes e cobertura documental.
-- Detalhamento com pagador, recebedor, forma, status e comprovante.
-- Exportação compatível com Excel via CSV UTF-8.
-- Geração de PDF usando a impressão nativa do navegador, com CSS específico para impressão.
-- Layout responsivo preservado.
+- Análise de PDF/JPG/PNG/WEBP com IA no servidor.
+- Extração de valor, data, pagador, recebedor, forma de pagamento e identificador PIX.
+- Sugestão de descrição e categoria usando as categorias do workspace.
+- Indicador de confiança e revisão humana antes da gravação.
+- Persistência dos metadados de IA (`ia_confianca`, `ia_dados`, `origem`).
+- Detecção de possível duplicidade pelo `pix_transacao_id` dentro do controle.
+- Chave da IA somente no servidor; nunca use `NEXT_PUBLIC_` para ela.
 
-## Banco de dados
-Esta versão não exige alteração de schema. Não é necessário executar `supabase/schema.sql` novamente se a v0.7.1 já está aplicada.
+## Configuração
+1. Execute `supabase/schema.sql` no SQL Editor (script idempotente).
+2. Na Vercel, crie `OPENAI_API_KEY` somente para Production/Preview conforme necessário.
+3. Opcional: `OPENAI_MODEL=gpt-5.6-luna` (padrão da aplicação).
+4. Faça novo deploy.
 
-## Publicação
-```powershell
-npm install
-npm run build
-git add .
-git commit -m "Implementa prestacao de contas v0.8"
-git push origin main
-```
+## Fluxo
+Importar WhatsApp → analisar conversa → em um candidato com comprovante, clicar **Analisar comprovante com IA** → revisar os campos → selecionar → importar.
 
-## Teste
-Abra Relatórios, escolha o período, confira os totais, teste Exportar Excel (CSV) e Gerar PDF / Imprimir.
+A IA não grava automaticamente. O usuário sempre revisa e confirma o lançamento.
