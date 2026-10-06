@@ -46,3 +46,22 @@ Na Vercel, abra **Project > Settings > Environment Variables** e cadastre as mes
 - O bucket `comprovantes` é privado.
 - Cada upload fica em uma pasta cujo primeiro segmento é o UUID do usuário.
 - A visualização usa URL assinada temporária (60 s).
+
+## v0.3 — Importador WhatsApp real
+A tela **Importar WhatsApp** agora:
+- lê o `chat.txt` exportado pelo WhatsApp no navegador;
+- interpreta mensagens multilinha, data/hora e autor;
+- detecta candidatos de despesas por contexto, valor, categoria e referência a PDF;
+- permite revisar, editar, selecionar ou ignorar cada candidato;
+- aceita selecionar junto PDFs/imagens e associa o comprovante pelo nome citado no chat;
+- só grava no PostgreSQL depois da confirmação do usuário;
+- envia comprovantes encontrados para o bucket privado `comprovantes`.
+
+### Como testar com o caso Pai - Despesas
+1. Entre em **Importar WhatsApp**.
+2. Selecione `chat.txt` (e, se disponíveis, os PDFs citados no chat).
+3. Clique em **Analisar conversa**.
+4. Revise os candidatos. Itens sem valor ficam desmarcados até que o valor seja informado.
+5. Marque os lançamentos desejados e clique em **Importar selecionados**.
+
+> O parser não inventa valores ausentes no `.txt`. Se o WhatsApp exportou apenas `<imagem ocultada>` ou uma referência de PDF sem valor textual, o lançamento fica para conferência manual. Leitura automática do conteúdo de PDF/imagem por IA/OCR é a próxima camada.
