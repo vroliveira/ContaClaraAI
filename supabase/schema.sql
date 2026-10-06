@@ -75,3 +75,26 @@ using (bucket_id='comprovantes' and owner_id = (select auth.uid()::text));
 drop policy if exists "comprovantes_delete_own" on storage.objects;
 create policy "comprovantes_delete_own" on storage.objects for delete to authenticated
 using (bucket_id='comprovantes' and owner_id = (select auth.uid()::text));
+
+-- v0.4.1 - Categorias configuráveis
+create table if not exists public.categorias (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  nome text not null,
+  descricao text,
+  ativo boolean not null default true,
+  ordem integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint categorias_user_nome_unique unique (user_id, nome)
+);
+create index if not exists categorias_user_id_idx on public.categorias(user_id);
+alter table public.categorias enable row level security;
+drop policy if exists "categorias_select_own" on public.categorias;
+create policy "categorias_select_own" on public.categorias for select to authenticated using (auth.uid() = user_id);
+drop policy if exists "categorias_insert_own" on public.categorias;
+create policy "categorias_insert_own" on public.categorias for insert to authenticated with check (auth.uid() = user_id);
+drop policy if exists "categorias_update_own" on public.categorias;
+create policy "categorias_update_own" on public.categorias for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "categorias_delete_own" on public.categorias;
+create policy "categorias_delete_own" on public.categorias for delete to authenticated using (auth.uid() = user_id);
