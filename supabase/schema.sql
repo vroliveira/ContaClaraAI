@@ -571,3 +571,22 @@ end; $$;
 drop trigger if exists trg_criar_consumo_armazenamento_org on public.organizacoes;
 create trigger trg_criar_consumo_armazenamento_org after insert on public.organizacoes
 for each row execute function public.criar_consumo_armazenamento_org();
+
+-- v0.12.2 - Checkout hospedado Mercado Pago
+-- Mantém o vínculo seguro entre o workspace e a assinatura criada no checkout do plano.
+create table if not exists public.billing_checkout_pendentes (
+  id uuid primary key default gen_random_uuid(),
+  organizacao_id uuid not null unique references public.organizacoes(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete set null,
+  plano_codigo text not null check (plano_codigo in ('plus','pro')),
+  plano_externo_id text not null,
+  pagador_email text not null,
+  status text not null default 'pendente' check (status in ('pendente','concluido','cancelado')),
+  assinatura_externa_id text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index if not exists ix_billing_checkout_pendente_lookup
+  on public.billing_checkout_pendentes(plano_externo_id,pagador_email,status,updated_at desc);
+alter table public.billing_checkout_pendentes enable row level security;
+-- Sem policy para authenticated: leitura/escrita somente pelas rotas server-side com secret/service role.

@@ -68,6 +68,8 @@ export async function mp(path,options={}){
 
 export function mapStatus(s){if(s==='authorized')return 'ativo';if(s==='paused'||s==='pending')return 'inadimplente';if(s==='cancelled'||s==='canceled')return 'cancelado';return 'inadimplente'}
 
+export function subscriptionPayerEmail(sub){return String(sub?.payer_email||sub?.payer?.email||'').trim().toLowerCase()}
+
 export async function persistSubscription(db,organizationId,sub){
   const planExternal=sub.preapproval_plan_id||null;let planCode=null;
   if(planExternal===env('MERCADOPAGO_PLUS_PLAN_ID'))planCode='plus';

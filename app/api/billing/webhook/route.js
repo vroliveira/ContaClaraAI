@@ -1,74 +1,66 @@
 import {NextResponse} from 'next/server';
-import {admin,mp,persistSubscription} from '../_server';
+import {admin,mp,persistSubscription,subscriptionPayerEmail} from '../_server';
 
 function notificationData(reqUrl, body) {
   const url = new URL(reqUrl);
-  const dataId =
-    url.searchParams.get('data.id') ||
-    url.searchParams.get('data_id') ||
-    body?.data?.id ||
-    body?.id ||
-    null;
+  const dataId = url.searchParams.get('data.id') || url.searchParams.get('data_id') || body?.data?.id || body?.id || null;
   const type = url.searchParams.get('type') || body?.type || body?.topic || null;
   return {dataId: dataId ? String(dataId) : null, type};
 }
 
-function isKnownPlan(subscription) {
-  const planId = subscription?.preapproval_plan_id;
-  return Boolean(
-    planId &&
-    (planId === process.env.MERCADOPAGO_PLUS_PLAN_ID ||
-      planId === process.env.MERCADOPAGO_PRO_PLAN_ID)
-  );
+function knownPlanCode(subscription) {
+  const planId=String(subscription?.preapproval_plan_id||'');
+  if(planId===String(process.env.MERCADOPAGO_PLUS_PLAN_ID||''))return 'plus';
+  if(planId===String(process.env.MERCADOPAGO_PRO_PLAN_ID||''))return 'pro';
+  return null;
 }
 
 export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}));
-    const {dataId, type} = notificationData(req.url, body);
+    const {dataId,type}=notificationData(req.url,body);
+    if(!dataId)return NextResponse.json({ok:true,ignored:'missing_data_id'});
+    if(type && type!=='subscription_preapproval')return NextResponse.json({ok:true,ignored:'unsupported_type'});
 
-    // Para Assinaturas, a notification_url é enviada na criação do /preapproval.
-    // A notificação recebida é tratada apenas como um aviso: nenhuma informação
-    // financeira do payload é usada para liberar plano. O estado oficial é
-    // consultado novamente na API do Mercado Pago usando nosso Access Token.
-    if (!dataId) return NextResponse.json({ok: true, ignored: 'missing_data_id'});
+    // O payload é somente um aviso. O estado oficial sempre é relido na API MP.
+    const subscription=await mp(`/preapproval/${encodeURIComponent(dataId)}`);
+    const planCode=knownPlanCode(subscription);
+    if(!planCode)return NextResponse.json({ok:true,ignored:'unknown_plan'});
 
-    // Processa o evento de vínculo/atualização da assinatura. Alguns formatos
-    // antigos podem chegar sem type; nesse caso, tentamos confirmar o recurso.
-    if (type && type !== 'subscription_preapproval') {
-      return NextResponse.json({ok: true, ignored: 'unsupported_type'});
+    const db=admin();
+    let organizationId=String(subscription.external_reference||'').trim();
+    let pending=null;
+
+    // Hosted Checkout do preapproval_plan pode não carregar external_reference
+    // específico do workspace. Nesse caso resolvemos o vínculo pelo checkout
+    // pendente criado antes do redirecionamento (plano + e-mail do pagador).
+    if(!organizationId){
+      const email=subscriptionPayerEmail(subscription);
+      if(!email)return NextResponse.json({ok:true,ignored:'missing_payer_email'});
+      const {data,error}=await db.from('billing_checkout_pendentes')
+        .select('id,organizacao_id')
+        .eq('plano_externo_id',String(subscription.preapproval_plan_id))
+        .eq('pagador_email',email)
+        .eq('status','pendente')
+        .order('updated_at',{ascending:false})
+        .limit(1)
+        .maybeSingle();
+      if(error)throw new Error(`Falha ao localizar checkout pendente: ${error.message}`);
+      if(!data)return NextResponse.json({ok:true,ignored:'pending_checkout_not_found'});
+      pending=data; organizationId=data.organizacao_id;
     }
 
-    const subscription = await mp(`/preapproval/${encodeURIComponent(dataId)}`);
+    const {data:organization,error:orgError}=await db.from('organizacoes').select('id').eq('id',organizationId).maybeSingle();
+    if(orgError)throw new Error(`Falha ao validar organização: ${orgError.message}`);
+    if(!organization)return NextResponse.json({ok:true,ignored:'organization_not_found'});
 
-    // Defesa adicional: só aceitamos assinaturas vinculadas aos planos Plus/Pro
-    // configurados nesta implantação do ContaClaraAI.
-    if (!isKnownPlan(subscription)) {
-      return NextResponse.json({ok: true, ignored: 'unknown_plan'});
+    await persistSubscription(db,organizationId,subscription);
+    if(pending?.id){
+      await db.from('billing_checkout_pendentes').update({status:'concluido',assinatura_externa_id:subscription.id,updated_at:new Date().toISOString()}).eq('id',pending.id);
     }
-
-    const organizationId = String(subscription.external_reference || '');
-    if (!organizationId) {
-      return NextResponse.json({ok: true, ignored: 'missing_external_reference'});
-    }
-
-    const db = admin();
-    const {data: organization} = await db
-      .from('organizacoes')
-      .select('id')
-      .eq('id', organizationId)
-      .maybeSingle();
-
-    if (!organization) {
-      return NextResponse.json({ok: true, ignored: 'organization_not_found'});
-    }
-
-    await persistSubscription(db, organizationId, subscription);
-    return NextResponse.json({ok: true});
+    return NextResponse.json({ok:true});
   } catch (error) {
-    console.error('Mercado Pago subscription webhook', error);
-    // Retorna 500 para permitir que o Mercado Pago faça novas tentativas em
-    // falhas transitórias de API/banco. Eventos inválidos são respondidos acima.
-    return NextResponse.json({error: 'Falha temporária ao processar notificação.'}, {status: 500});
+    console.error('Mercado Pago subscription webhook',error);
+    return NextResponse.json({error:'Falha temporária ao processar notificação.'},{status:500});
   }
 }
