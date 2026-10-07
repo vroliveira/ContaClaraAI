@@ -107,3 +107,15 @@ A criação passa a usar a RPC `criar_organizacao`, que obtém o proprietário d
 - O quadro identifica visualmente que o resultado é consolidado por organização.
 - Os demais indicadores do Dashboard continuam no escopo do controle atual nesta versão, evitando mudança silenciosa de semântica.
 - Não requer migration SQL.
+
+
+## v0.16.0 — Conciliação Bancária 2.0
+- Histórico persistente de importações OFX/CSV.
+- Banco, conta, moeda e período identificados do OFX quando disponíveis.
+- Contagem de registros lidos, importados e duplicados.
+- Visões Conciliação, Movimentações e Importações.
+- Filtros por texto, entrada/saída, período e status.
+- Totais separados de entradas e saídas.
+- Reabertura de movimentações conciliadas/ignoradas.
+- Análise em lote respeitando o filtro atual.
+- Migration: `supabase/v0.16.0-conciliacao-bancaria-2.sql`.
