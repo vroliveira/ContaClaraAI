@@ -61,3 +61,11 @@ Antes de publicar esta versão, execute no Supabase SQL Editor o arquivo:
 `supabase/v0.15.1-fix-organizacao.sql`
 
 A criação passa a usar a RPC `criar_organizacao`, que obtém o proprietário diretamente de `auth.uid()` no PostgreSQL. O cliente não pode escolher outro `owner_id`, preservando o isolamento multi-tenant e as políticas RLS existentes.
+
+## v0.15.2 — Categorização Inteligente do Extrato
+- CSV: reconhece coluna `Categoria/Category` quando fornecida pelo banco.
+- OFX/CSV: botão **Sugerir categorias com IA** classifica até 30 movimentações pendentes por lote.
+- A IA prioriza categorias existentes e, quando nenhuma se encaixa, propõe uma nova categoria reutilizável.
+- Novas categorias só são cadastradas após confirmação em **Criar categoria**.
+- Ao confirmar uma nova categoria, o ContaClaraAI grava uma regra de aprendizado por descrição para reaplicar a classificação em importações futuras.
+- Antes do deploy, execute `supabase/v0.15.2-categorizacao-inteligente.sql` no SQL Editor.
