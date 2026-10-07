@@ -1,3 +1,15 @@
+# ContaClaraAI v0.15.4 — Autocomplete de Pessoas
+
+## Novidades
+- Campo **Quem pagou?** com autocomplete usando pessoas cadastradas e pagadores já existentes nas despesas.
+- Permite continuar digitando um nome que ainda não exista.
+- Ao salvar uma despesa nova ou editar uma existente, o pagador inexistente é cadastrado automaticamente em **Pessoas**.
+- Normalização de espaços e comparação sem diferenciar maiúsculas/minúsculas para reduzir duplicidades.
+- Reutiliza a restrição única de pessoas da v0.15.3 para proteção adicional contra duplicidade.
+
+## Banco de dados
+Não há nova estrutura obrigatória. A migration `supabase/v0.15.4-autocomplete-pagador.sql` é apenas informativa. É necessário que a migration da v0.15.3 já tenha sido executada.
+
 # ContaClaraAI v0.13.2 — Logo oficial na área autenticada
 
 Baseada na v0.13.1.

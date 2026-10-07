@@ -1,0 +1,4 @@
+-- ContaClaraAI v0.15.4 - Autocomplete de Pessoas no campo Quem pagou?
+-- Não há alteração estrutural obrigatória.
+-- Esta versão reutiliza public.pessoas e o índice único pessoas_controle_nome_uidx da v0.15.3.
+-- Execute a migration v0.15.3 antes desta versão, caso ainda não tenha sido aplicada.
