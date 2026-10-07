@@ -63,3 +63,8 @@
 aside .brand .officialAppLogo{display:block;width:100%;max-width:205px;height:auto;max-height:58px;object-fit:contain;object-position:left center;background:#fff;border-radius:10px;padding:4px 7px}
 .mobileBrand .officialAppLogo{display:block;width:auto;max-width:190px;height:42px;object-fit:contain;object-position:left center;background:#fff;border-radius:9px;padding:3px 6px}
 @media(max-width:480px){.mobileBrand .officialAppLogo{max-width:165px;height:38px}}
+
+/* v0.13.3 - logo oficial na autenticacao */
+.authBrand{display:flex;align-items:center;margin-top:16px}
+.authBrand .officialAuthLogo{display:block;width:min(100%,300px);height:auto;max-height:82px;object-fit:contain;object-position:left center}
+@media(max-width:480px){.authBrand .officialAuthLogo{width:min(100%,260px);max-height:72px}}
