@@ -40,3 +40,23 @@ git push origin main
 ```
 
 Após o deploy, saia e entre novamente no ContaClaraAI e teste Assinatura > Plus. Se houver falha, a mensagem agora identifica a etapa real (Supabase, organização, permissão ou Mercado Pago).
+
+## v0.12.0 — Administração SaaS
+
+Inclui painel interno **Admin SaaS** com: MRR/ARR, clientes, workspaces, distribuição por planos, trials, assinaturas, inadimplência, consumo mensal de IA e telemetria de armazenamento.
+
+### Migração obrigatória
+Execute o `supabase/schema.sql` atualizado no SQL Editor do projeto Supabase. Em seguida, autorize o primeiro administrador usando o e-mail da sua conta (substitua pelo seu e-mail real):
+
+```sql
+insert into public.saas_admins(user_id,nome)
+select id, coalesce(raw_user_meta_data->>'name', email)
+from auth.users
+where lower(email)=lower('SEU_EMAIL_AQUI')
+on conflict(user_id) do update set ativo=true, updated_at=now();
+```
+
+O menu **Admin SaaS** só aparece para usuários presentes em `saas_admins` com `ativo=true`. A API `/api/admin/overview` revalida o JWT e a permissão no servidor antes de consultar dados com Service Role.
+
+### Armazenamento
+A v0.12.0 cria `consumo_armazenamento` para telemetria por workspace. Workspaces existentes começam em 0 até a contabilização dos arquivos ser integrada ao fluxo de upload. O painel identifica isso como telemetria registrada, evitando estimativas incorretas.

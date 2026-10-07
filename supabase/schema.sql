@@ -535,3 +535,39 @@ alter table public.assinaturas add column if not exists valor numeric(10,2);
 alter table public.assinaturas add column if not exists proxima_cobranca timestamptz;
 alter table public.assinaturas add column if not exists data_cancelamento timestamptz;
 create index if not exists ix_assinaturas_externa on public.assinaturas(assinatura_externa_id) where assinatura_externa_id is not null;
+
+-- v0.12.0 - Administração SaaS
+create table if not exists public.saas_admins (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  nome text,
+  ativo boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.saas_admins enable row level security;
+-- Sem policies para authenticated: o painel administrativo consulta esta tabela somente no servidor via service role.
+
+create table if not exists public.consumo_armazenamento (
+  organizacao_id uuid primary key references public.organizacoes(id) on delete cascade,
+  bytes_utilizados bigint not null default 0 check(bytes_utilizados >= 0),
+  arquivos integer not null default 0 check(arquivos >= 0),
+  updated_at timestamptz not null default now()
+);
+alter table public.consumo_armazenamento enable row level security;
+drop policy if exists "storage_usage_org_read" on public.consumo_armazenamento;
+create policy "storage_usage_org_read" on public.consumo_armazenamento for select to authenticated
+using(public.can_access_org(organizacao_id));
+
+insert into public.consumo_armazenamento(organizacao_id)
+select id from public.organizacoes
+on conflict(organizacao_id) do nothing;
+
+create or replace function public.criar_consumo_armazenamento_org() returns trigger
+language plpgsql security definer set search_path=public as $$
+begin
+ insert into public.consumo_armazenamento(organizacao_id) values(new.id) on conflict do nothing;
+ return new;
+end; $$;
+drop trigger if exists trg_criar_consumo_armazenamento_org on public.organizacoes;
+create trigger trg_criar_consumo_armazenamento_org after insert on public.organizacoes
+for each row execute function public.criar_consumo_armazenamento_org();
