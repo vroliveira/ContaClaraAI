@@ -1,9 +1,10 @@
-# ContaClaraAI v0.11.1 — Mercado Pago
+# ContaClaraAI v0.11.2 — Mercado Pago Webhook
 
 Integração de assinaturas recorrentes Plus/Pro com Mercado Pago.
 
 ## Recursos
 - Checkout de assinatura Plus e Pro
+- `notification_url` enviada automaticamente na criação de cada assinatura, derivada de `NEXT_PUBLIC_APP_URL`
 - Persistência do ID da assinatura e do plano Mercado Pago
 - Sincronização manual do status
 - Webhook com validação HMAC (`x-signature`)
@@ -33,14 +34,14 @@ Crie dois planos recorrentes mensais no Mercado Pago (Plus e Pro) e coloque os I
 Webhook de produção:
 `https://conta-clara-ai-ten.vercel.app/api/billing/webhook`
 
-Ative eventos de assinaturas, principalmente `subscription_preapproval`. Use a assinatura secreta gerada pelo Mercado Pago como `MERCADOPAGO_WEBHOOK_SECRET`.
+Na v0.11.2 essa URL é enviada automaticamente no campo `notification_url` ao criar o `/preapproval`. Portanto, para esse fluxo de Assinaturas, não é necessário informar manualmente a URL em cada contratação. O endpoint continua validando `x-signature` usando `MERCADOPAGO_WEBHOOK_SECRET`.
 
 ## 4. Publicação
 ```powershell
 npm install
 npm run build
 git add .
-git commit -m "Integra Mercado Pago v0.11.1"
+git commit -m "Corrige notification_url Mercado Pago v0.11.2"
 git push origin main
 ```
 
