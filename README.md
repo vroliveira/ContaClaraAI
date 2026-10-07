@@ -119,3 +119,21 @@ A criação passa a usar a RPC `criar_organizacao`, que obtém o proprietário d
 - Reabertura de movimentações conciliadas/ignoradas.
 - Análise em lote respeitando o filtro atual.
 - Migration: `supabase/v0.16.0-conciliacao-bancaria-2.sql`.
+
+## v0.17.0 — Onboarding 2.0
+
+Novo onboarding guiado para contas recém-criadas:
+
+1. Nome da organização/workspace.
+2. Finalidade de uso.
+3. Nome do primeiro controle.
+4. Categorias iniciais sugeridas conforme a finalidade.
+5. Cadastro opcional da primeira pessoa/pagador.
+6. Escolha da primeira ação: nova despesa, importar WhatsApp, conciliação bancária ou Dashboard.
+
+O progresso é persistido no Supabase para permitir continuar depois. A escolha de plano feita no hotsite é preservada e, após concluir a configuração, direciona o usuário para Assinatura.
+
+### Banco de dados
+Antes do deploy, execute no SQL Editor do Supabase:
+
+`supabase/v0.17.0-onboarding-2.sql`
