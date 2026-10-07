@@ -1,28 +1,48 @@
-# ContaClaraAI v0.11 — Comercialização SaaS
+# ContaClaraAI v0.11.1 — Mercado Pago
 
-Evolução da v0.10 com fundação comercial por workspace.
+Integração de assinaturas recorrentes Plus/Pro com Mercado Pago.
 
-## Novidades
-- Menu **Assinatura** responsivo.
-- Planos Free, Plus e Pro persistidos no Supabase.
-- Assinatura por organização/workspace.
-- Status de assinatura/trial e período.
-- Indicadores de consumo: controles, membros, IA/mês e estrutura para armazenamento.
-- Cards de preços e limites comerciais.
-- RLS para planos, assinaturas e consumo.
-- Provisionamento automático do plano Free para novos workspaces.
+## Recursos
+- Checkout de assinatura Plus e Pro
+- Persistência do ID da assinatura e do plano Mercado Pago
+- Sincronização manual do status
+- Webhook com validação HMAC (`x-signature`)
+- Ativação do plano somente após confirmação do status pelo Mercado Pago
+- Cancelamento server-side
+- Mantém Free sem cobrança
 
-## Importante
-Execute `supabase/schema.sql` no SQL Editor antes do deploy. O script usa operações idempotentes nas policies e seeds.
+## 1. Banco
+Execute `supabase/schema.sql` no SQL Editor. O script adiciona metadados do Mercado Pago à tabela `assinaturas` e é reaplicável.
 
-## Checkout
-A v0.11 prepara banco, UI, planos e limites, mas **não ativa cobrança real**. O provedor de pagamentos deve ser definido antes de armazenar credenciais e implementar checkout/webhooks (Stripe, Mercado Pago, Pagar.me etc.). Isso evita acoplar o produto a um gateway sem decisão comercial.
+## 2. Variáveis Vercel (server-side)
+Configure sem prefixo `NEXT_PUBLIC_`:
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `MERCADOPAGO_ACCESS_TOKEN`
+- `MERCADOPAGO_WEBHOOK_SECRET`
+- `MERCADOPAGO_PLUS_PLAN_ID`
+- `MERCADOPAGO_PRO_PLAN_ID`
 
-## Publicação
+Também configure:
+- `NEXT_PUBLIC_APP_URL=https://conta-clara-ai-ten.vercel.app`
+
+As variáveis Supabase públicas já utilizadas pelo frontend continuam necessárias.
+
+## 3. Mercado Pago
+Crie dois planos recorrentes mensais no Mercado Pago (Plus e Pro) e coloque os IDs nas variáveis acima. O backend usa `/preapproval` para iniciar a assinatura e o `init_point` retornado para redirecionar ao checkout.
+
+Webhook de produção:
+`https://conta-clara-ai-ten.vercel.app/api/billing/webhook`
+
+Ative eventos de assinaturas, principalmente `subscription_preapproval`. Use a assinatura secreta gerada pelo Mercado Pago como `MERCADOPAGO_WEBHOOK_SECRET`.
+
+## 4. Publicação
 ```powershell
 npm install
 npm run build
 git add .
-git commit -m "Implementa comercializacao SaaS v0.11"
+git commit -m "Integra Mercado Pago v0.11.1"
 git push origin main
 ```
+
+## Segurança
+Nunca exponha Access Token, Webhook Secret ou Service Role Key no frontend/Git. Nenhuma dessas variáveis deve usar `NEXT_PUBLIC_`.

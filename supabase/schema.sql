@@ -527,3 +527,11 @@ begin
 end; $$;
 revoke all on function public.meu_consumo_saas(uuid) from public;
 grant execute on function public.meu_consumo_saas(uuid) to authenticated;
+
+-- v0.11.1 - Mercado Pago: metadados da assinatura recorrente
+alter table public.assinaturas add column if not exists plano_externo_id text;
+alter table public.assinaturas add column if not exists pagador_email text;
+alter table public.assinaturas add column if not exists valor numeric(10,2);
+alter table public.assinaturas add column if not exists proxima_cobranca timestamptz;
+alter table public.assinaturas add column if not exists data_cancelamento timestamptz;
+create index if not exists ix_assinaturas_externa on public.assinaturas(assinatura_externa_id) where assinatura_externa_id is not null;
