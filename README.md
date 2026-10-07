@@ -69,3 +69,13 @@ A criação passa a usar a RPC `criar_organizacao`, que obtém o proprietário d
 - Novas categorias só são cadastradas após confirmação em **Criar categoria**.
 - Ao confirmar uma nova categoria, o ContaClaraAI grava uma regra de aprendizado por descrição para reaplicar a classificação em importações futuras.
 - Antes do deploy, execute `supabase/v0.15.2-categorizacao-inteligente.sql` no SQL Editor.
+
+
+## v0.15.3 — Gestão de Pessoas
+- CRUD de pessoas por controle (criar, editar e excluir).
+- Campos: nome, e-mail, telefone e observações.
+- Total pago calculado a partir das despesas pelo nome do pagador.
+- Pagadores históricos ainda não cadastrados aparecem com ação “Cadastrar”.
+- Renomear uma pessoa atualiza o pagador das despesas vinculadas pelo nome anterior.
+- Exclusão é bloqueada quando existem despesas vinculadas, evitando perda de referência.
+- Execute `supabase/v0.15.3-gestao-pessoas.sql` antes do deploy.
