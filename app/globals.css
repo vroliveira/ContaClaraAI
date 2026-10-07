@@ -103,3 +103,23 @@ aside .brand .officialAppLogo{display:block;width:100%;max-width:205px;height:au
 
 /* v0.17.1 - Central de Ajuda + onboarding reexecutável */
 .helpFab{position:fixed;right:22px;bottom:22px;z-index:85;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 15px 10px 10px;background:#0877f9;color:#fff;box-shadow:0 12px 30px #0d3c7040;cursor:pointer;font-weight:800}.helpFab b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#fff;color:#0877f9;font-size:18px}.helpBackdrop{position:fixed;inset:0;background:#07182d70;z-index:120;display:flex;justify-content:flex-end}.helpPanel{width:min(430px,94vw);height:100%;background:#fff;color:#0d2745;padding:24px;box-shadow:-18px 0 45px #07182d30;overflow:auto}.helpHead{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;border-bottom:1px solid #e7edf4;padding-bottom:18px}.helpHead span{font-size:10px;font-weight:900;letter-spacing:.12em;color:#0877f9}.helpHead h2{margin:6px 0 0;font-size:23px}.helpHead>button{border:0;background:#f2f6fa;border-radius:9px;width:36px;height:36px;font-size:23px;cursor:pointer}.helpOptions{display:grid;gap:10px;margin:18px 0}.helpOptions>button{display:grid;gap:5px;text-align:left;border:1px solid #dce6f0;background:#fff;border-radius:12px;padding:15px;cursor:pointer;color:#0d2745}.helpOptions>button:hover{border-color:#0877f9;background:#f7fbff}.helpOptions small{color:#718096;line-height:1.4}.helpOptions span{color:#0877f9;font-size:12px;font-weight:800;margin-top:4px}.helpPageButton{border-style:dashed!important}.helpTips{display:grid;gap:12px;margin:20px 0}.helpTips>div{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;padding:13px;border-radius:11px;background:#f7faff}.helpTips b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#e8f3ff;color:#0877f9}.helpTips p{margin:4px 0;color:#526477;line-height:1.5}.helpFooter{margin-top:22px;padding-top:16px;border-top:1px solid #e7edf4;color:#8a98a8;font-size:11px}.helpPanel .wide{width:100%;margin-top:8px}@media(max-width:600px){.helpFab{right:14px;bottom:14px;padding:9px}.helpFab span{display:none}.helpPanel{width:100%;max-width:none}.helpBackdrop{justify-content:stretch}}
+
+/* v0.17.2 - Central de Ajuda: correcoes de usabilidade mobile */
+.helpBackdrop{z-index:2500;overscroll-behavior:contain;touch-action:manipulation}
+.helpPanel{max-height:100dvh;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.helpHead{position:sticky;top:-24px;z-index:2;background:#fff;padding-top:24px}
+.helpHead>button{min-width:44px;min-height:44px;touch-action:manipulation}
+.helpOptions>button,.helpPanel .primary,.helpPanel .ghost,.helpPanel .link{touch-action:manipulation}
+@media(max-width:600px){
+ .helpBackdrop{align-items:stretch;justify-content:stretch;background:#07182d99}
+ .helpPanel{width:100vw;height:100dvh;max-height:100dvh;border-radius:0;padding:calc(16px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));overflow-y:auto;overflow-x:hidden}
+ .helpHead{top:calc(-16px - env(safe-area-inset-top));margin:-16px -16px 0;padding:calc(16px + env(safe-area-inset-top)) 16px 14px}
+ .helpHead h2{font-size:20px;line-height:1.2}
+ .helpOptions{margin:14px 0;gap:9px}
+ .helpOptions>button{min-height:64px;padding:13px 14px}
+ .helpOptions>button b{line-height:1.25}
+ .helpOptions small{font-size:12px}
+ .helpTips{margin:14px 0}
+ .helpFooter{padding-bottom:env(safe-area-inset-bottom)}
+ .helpFab{z-index:1400;right:14px;bottom:calc(14px + env(safe-area-inset-bottom))}
+}
