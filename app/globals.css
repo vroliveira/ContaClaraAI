@@ -123,3 +123,17 @@ aside .brand .officialAppLogo{display:block;width:100%;max-width:205px;height:au
  .helpFooter{padding-bottom:env(safe-area-inset-bottom)}
  .helpFab{z-index:1400;right:14px;bottom:calc(14px + env(safe-area-inset-bottom))}
 }
+
+/* v0.17.3 - Ajuda/Tour mobile: viewport e fullscreen robusto */
+@media(max-width:900px){
+  body.helpLocked{overflow:hidden}
+  .onboardingBackdrop{z-index:4000;display:flex;align-items:flex-start;justify-content:stretch;padding:0;width:100vw;height:100dvh;min-height:100dvh;overflow:hidden;backdrop-filter:none}
+  .onboarding.onboardingV2{width:100vw;max-width:none;height:100dvh;min-height:100dvh;max-height:none;margin:0;border-radius:0;padding:calc(20px + env(safe-area-inset-top)) 18px calc(28px + env(safe-area-inset-bottom));overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .onboardingV2 input,.onboardingV2 select,.onboardingV2 textarea{font-size:16px}
+  .onboardingV2 .primary.wide{min-height:48px;margin-bottom:8px}
+  .onboardingV2 .onboardingSkip{position:static;display:block;min-height:44px;margin:0 0 10px auto;padding:8px 0 8px 14px;touch-action:manipulation}
+  .onboardingV2 .purposeGrid,.onboardingV2 .onboardingActions{grid-template-columns:1fr}
+  .onboardingV2 .purposeGrid button,.onboardingV2 .onboardingActions button,.onboardingV2 .onboardingCats button{min-height:44px;touch-action:manipulation}
+  .helpBackdrop{z-index:3900;width:100vw;height:100dvh;min-height:100dvh;overflow:hidden}
+  .helpPanel{box-sizing:border-box;min-height:100dvh;max-height:none}
+}
