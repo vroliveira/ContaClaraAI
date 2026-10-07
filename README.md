@@ -1,18 +1,19 @@
-# ContaClaraAI v0.13.1 — Logo oficial
+# ContaClaraAI v0.13.2 — Logo oficial na área autenticada
 
-Atualização visual sobre a v0.13.0.
+Baseada na v0.13.1.
 
 ## Alterações
-- Adiciona `public/contaclaraai-logo.png`.
-- Substitui a marca textual do cabeçalho público pelo novo logotipo ContaClaraAI.
-- Mantém responsividade no desktop e mobile.
-- Não altera banco, autenticação, billing ou Mercado Pago.
+- Mantém o logotipo oficial no hotsite público.
+- Aplica o mesmo logotipo oficial na sidebar após o login.
+- Aplica o logotipo oficial no cabeçalho mobile autenticado.
+- Preserva a possibilidade de uma organização usar um logotipo próprio em Configurações.
+- Nenhuma alteração de banco de dados, Supabase ou Mercado Pago.
 
 ## Publicação
-```powershell
+```bash
 npm install
 npm run build
 git add .
-git commit -m "Adiciona logo ContaClaraAI v0.13.1"
+git commit -m "Aplica logo oficial na area autenticada v0.13.2"
 git push origin main
 ```

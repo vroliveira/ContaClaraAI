@@ -58,3 +58,8 @@
 /* v0.13.1 - identidade visual ContaClaraAI */
 .landingBrand img{display:block;width:auto;height:46px;max-width:240px;object-fit:contain;object-position:left center}
 @media(max-width:700px){.landingBrand img{height:38px;max-width:190px}}
+
+/* v0.13.2 - logo oficial também na área autenticada */
+aside .brand .officialAppLogo{display:block;width:100%;max-width:205px;height:auto;max-height:58px;object-fit:contain;object-position:left center;background:#fff;border-radius:10px;padding:4px 7px}
+.mobileBrand .officialAppLogo{display:block;width:auto;max-width:190px;height:42px;object-fit:contain;object-position:left center;background:#fff;border-radius:9px;padding:3px 6px}
+@media(max-width:480px){.mobileBrand .officialAppLogo{max-width:165px;height:38px}}
