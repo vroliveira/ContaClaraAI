@@ -60,3 +60,15 @@ O menu **Admin SaaS** só aparece para usuários presentes em `saas_admins` com 
 
 ### Armazenamento
 A v0.12.0 cria `consumo_armazenamento` para telemetria por workspace. Workspaces existentes começam em 0 até a contabilização dos arquivos ser integrada ao fluxo de upload. O painel identifica isso como telemetria registrada, evitando estimativas incorretas.
+
+## v0.12.1 — Admin Detection Fix
+
+Correção da detecção do administrador SaaS.
+
+- Novo endpoint `GET /api/admin/me`, validado no servidor.
+- O JWT da sessão Supabase é renovado quando estiver próximo de expirar.
+- O frontend não consulta `saas_admins` diretamente e não decide a autorização sozinho.
+- O menu `Admin SaaS` é exibido somente após `/api/admin/me` retornar `isAdmin: true`.
+- O dashboard `/api/admin/overview` continua protegido no servidor.
+- Erros de detecção agora são exibidos na interface para diagnóstico, em vez de ficarem somente no console.
+- Não há migration SQL adicional em relação à v0.12.0.
