@@ -1,3 +1,38 @@
+# ContaClaraAI v0.11.4 — Correção de autenticação do Billing
+
+Esta versão corrige o erro **“Sessão inválida”** ao iniciar uma assinatura Mercado Pago.
+
+## Alterações
+- Billing envia o JWT atual do Supabase no header `Authorization: Bearer`.
+- O frontend renova automaticamente a sessão quando o token estiver a menos de 60 segundos de expirar.
+- O backend valida o JWT usando `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, ou seja, o mesmo projeto de Auth usado pelo navegador.
+- Após validar o usuário, operações privilegiadas continuam usando `SUPABASE_SERVICE_ROLE_KEY` somente no servidor.
+- `checkout`, `sync` e `cancel` retornam HTTP 401 para sessão ausente/inválida.
+- A mensagem de erro de autenticação inclui o motivo retornado pelo Supabase para facilitar diagnóstico sem expor tokens.
+
+## Variáveis necessárias na Vercel
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+NEXT_PUBLIC_APP_URL=https://conta-clara-ai-ten.vercel.app
+MERCADOPAGO_ACCESS_TOKEN=...
+MERCADOPAGO_PLUS_PLAN_ID=...
+MERCADOPAGO_PRO_PLAN_ID=...
+```
+
+Não use `NEXT_PUBLIC_` em `SUPABASE_SERVICE_ROLE_KEY` ou `MERCADOPAGO_ACCESS_TOKEN`.
+
+## Banco de dados
+Não há migration nova nesta versão.
+
+## Teste recomendado
+1. Faça deploy.
+2. Saia e entre novamente no ContaClaraAI uma vez.
+3. Abra **Assinatura**.
+4. Clique em **Assinar com Mercado Pago** no Plus.
+5. Se houver erro, a mensagem agora deverá indicar o motivo real de validação do JWT.
+
 # ContaClaraAI v0.11.3 — Mercado Pago Assinaturas
 
 Correção do webhook para o fluxo específico de Assinaturas (`preapproval`) do Mercado Pago.
