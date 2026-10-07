@@ -466,3 +466,64 @@ drop policy if exists "rateios_select" on public.rateios; create policy "rateios
 drop policy if exists "rateios_insert" on public.rateios; create policy "rateios_insert" on public.rateios for insert to authenticated with check(user_id=auth.uid() and public.can_edit_controle(controle_id));
 drop policy if exists "rateios_update" on public.rateios; create policy "rateios_update" on public.rateios for update to authenticated using(public.can_edit_controle(controle_id)) with check(public.can_edit_controle(controle_id));
 drop policy if exists "rateios_delete" on public.rateios; create policy "rateios_delete" on public.rateios for delete to authenticated using(public.can_edit_controle(controle_id));
+
+-- v0.11 - Comercialização SaaS: planos, assinatura, trial e consumo
+create table if not exists public.planos_saas (
+ id uuid primary key default gen_random_uuid(), codigo text not null unique, nome text not null,
+ preco_mensal numeric(10,2) not null default 0, limite_controles integer, limite_membros integer,
+ limite_ia_mes integer, limite_armazenamento_mb integer, ativo boolean not null default true,
+ created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+insert into public.planos_saas(codigo,nome,preco_mensal,limite_controles,limite_membros,limite_ia_mes,limite_armazenamento_mb)
+values ('free','Free',0,1,2,10,100),('plus','Plus',29.90,5,10,150,2048),('pro','Pro',69.90,50,30,600,10240)
+on conflict(codigo) do update set nome=excluded.nome,preco_mensal=excluded.preco_mensal,limite_controles=excluded.limite_controles,limite_membros=excluded.limite_membros,limite_ia_mes=excluded.limite_ia_mes,limite_armazenamento_mb=excluded.limite_armazenamento_mb,updated_at=now();
+
+create table if not exists public.assinaturas (
+ id uuid primary key default gen_random_uuid(), organizacao_id uuid not null unique references public.organizacoes(id) on delete cascade,
+ plano_id uuid not null references public.planos_saas(id), status text not null default 'trial' check(status in ('trial','ativo','inadimplente','cancelado','free')),
+ trial_inicio timestamptz, trial_fim timestamptz, periodo_inicio timestamptz, periodo_fim timestamptz,
+ provedor text, cliente_externo_id text, assinatura_externa_id text,
+ created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+-- Workspaces existentes recebem Free. Novos workspaces também serão provisionados por trigger.
+insert into public.assinaturas(organizacao_id,plano_id,status)
+select o.id,p.id,'free' from public.organizacoes o cross join public.planos_saas p
+where p.codigo='free' and not exists(select 1 from public.assinaturas a where a.organizacao_id=o.id);
+
+create or replace function public.criar_assinatura_padrao_org() returns trigger language plpgsql security definer set search_path=public as $$
+declare v_plan uuid;
+begin
+ select id into v_plan from public.planos_saas where codigo='free' limit 1;
+ if v_plan is not null then insert into public.assinaturas(organizacao_id,plano_id,status) values(new.id,v_plan,'free') on conflict(organizacao_id) do nothing; end if;
+ return new;
+end; $$;
+drop trigger if exists trg_criar_assinatura_padrao_org on public.organizacoes;
+create trigger trg_criar_assinatura_padrao_org after insert on public.organizacoes for each row execute function public.criar_assinatura_padrao_org();
+
+create table if not exists public.consumo_ia (
+ id uuid primary key default gen_random_uuid(), organizacao_id uuid not null references public.organizacoes(id) on delete cascade,
+ user_id uuid references auth.users(id) on delete set null, competencia date not null, quantidade integer not null default 0,
+ created_at timestamptz not null default now(), updated_at timestamptz not null default now(), unique(organizacao_id,competencia)
+);
+
+alter table public.planos_saas enable row level security;
+alter table public.assinaturas enable row level security;
+alter table public.consumo_ia enable row level security;
+drop policy if exists "planos_read" on public.planos_saas; create policy "planos_read" on public.planos_saas for select to authenticated using(ativo=true);
+drop policy if exists "assinaturas_read" on public.assinaturas; create policy "assinaturas_read" on public.assinaturas for select to authenticated using(public.can_access_org(organizacao_id));
+drop policy if exists "consumo_ia_read" on public.consumo_ia; create policy "consumo_ia_read" on public.consumo_ia for select to authenticated using(public.can_access_org(organizacao_id));
+
+create or replace function public.meu_consumo_saas(p_organizacao uuid)
+returns jsonb language plpgsql stable security definer set search_path=public as $$
+declare v_controles int; v_membros int; v_ia int; v_storage numeric;
+begin
+ if not public.can_access_org(p_organizacao) then raise exception 'Acesso negado'; end if;
+ select count(*) into v_controles from public.controles where organizacao_id=p_organizacao and ativo=true;
+ select count(*) into v_membros from public.organizacao_membros where organizacao_id=p_organizacao and status='ativo';
+ select coalesce(sum(quantidade),0) into v_ia from public.consumo_ia where organizacao_id=p_organizacao and competencia=date_trunc('month',current_date)::date;
+ -- Storage exato depende do provedor; nesta versão fica 0 até contabilização server-side.
+ v_storage:=0;
+ return jsonb_build_object('controles',v_controles,'membros',v_membros,'ia_mes',v_ia,'armazenamento_mb',v_storage);
+end; $$;
+revoke all on function public.meu_consumo_saas(uuid) from public;
+grant execute on function public.meu_consumo_saas(uuid) to authenticated;
