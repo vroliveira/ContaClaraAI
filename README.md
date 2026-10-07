@@ -50,3 +50,14 @@ O CSV deve possuir ao menos colunas equivalentes a `Data` e `Valor`. São reconh
 
 ### Observação
 Esta versão não conecta diretamente a bancos/Open Finance. A integração automática por API fica reservada para uma evolução posterior; a v0.15.0 trabalha com arquivos exportados pelo banco.
+
+
+## v0.15.1 — Correção de criação de organizações
+
+Corrige o erro `new row violates row-level security policy for table "organizacoes"` ao criar um novo workspace.
+
+Antes de publicar esta versão, execute no Supabase SQL Editor o arquivo:
+
+`supabase/v0.15.1-fix-organizacao.sql`
+
+A criação passa a usar a RPC `criar_organizacao`, que obtém o proprietário diretamente de `auth.uid()` no PostgreSQL. O cliente não pode escolher outro `owner_id`, preservando o isolamento multi-tenant e as políticas RLS existentes.
