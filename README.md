@@ -137,3 +137,12 @@ O progresso é persistido no Supabase para permitir continuar depois. A escolha 
 Antes do deploy, execute no SQL Editor do Supabase:
 
 `supabase/v0.17.0-onboarding-2.sql`
+
+
+## v0.17.1 — Central de Ajuda + Onboarding Reexecutável
+- Botão flutuante Ajuda disponível em toda a área autenticada.
+- Central de Ajuda com atalhos para despesas, conciliação bancária, WhatsApp e relatórios.
+- Ajuda contextual por tela.
+- Tour do ContaClaraAI pode ser reexecutado por usuários antigos.
+- Tour de revisão não altera organização, controle, categorias, pessoas ou progresso concluído.
+- Não requer migration SQL.
