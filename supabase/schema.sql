@@ -434,3 +434,35 @@ alter table public.despesas add column if not exists origem text not null defaul
 alter table public.despesas add column if not exists ia_confianca smallint;
 alter table public.despesas add column if not exists ia_dados jsonb;
 create index if not exists despesas_controle_pix_idx on public.despesas(controle_id,pix_transacao_id) where pix_transacao_id is not null;
+
+-- v0.10 - Gestão financeira: orçamento, recorrências e rateios
+create table if not exists public.orcamentos (
+ id uuid primary key default gen_random_uuid(), controle_id uuid not null references public.controles(id) on delete cascade,
+ organizacao_id uuid not null references public.organizacoes(id) on delete cascade, user_id uuid not null references auth.users(id) on delete cascade,
+ mes date not null, limite_geral numeric(12,2) not null default 0, categoria text, limite_categoria numeric(12,2), created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+create unique index if not exists orcamentos_controle_mes_categoria_uq on public.orcamentos(controle_id,mes,coalesce(categoria,''));
+create table if not exists public.despesas_recorrentes (
+ id uuid primary key default gen_random_uuid(), controle_id uuid not null references public.controles(id) on delete cascade,
+ organizacao_id uuid not null references public.organizacoes(id) on delete cascade, user_id uuid not null references auth.users(id) on delete cascade,
+ descricao text not null, categoria text not null, valor numeric(12,2) not null check(valor>0), dia_vencimento smallint not null check(dia_vencimento between 1 and 31), pagador text, fornecedor text, forma_pagamento text, ativo boolean not null default true, created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+create table if not exists public.rateios (
+ id uuid primary key default gen_random_uuid(), controle_id uuid not null references public.controles(id) on delete cascade,
+ organizacao_id uuid not null references public.organizacoes(id) on delete cascade, user_id uuid not null references auth.users(id) on delete cascade,
+ descricao text not null, valor_total numeric(12,2) not null check(valor_total>0), pago_por text not null, participantes jsonb not null default '[]'::jsonb, observacoes text, created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+);
+
+alter table public.orcamentos enable row level security; alter table public.despesas_recorrentes enable row level security; alter table public.rateios enable row level security;
+drop policy if exists "orcamentos_select" on public.orcamentos; create policy "orcamentos_select" on public.orcamentos for select to authenticated using(public.can_access_controle(controle_id));
+drop policy if exists "orcamentos_insert" on public.orcamentos; create policy "orcamentos_insert" on public.orcamentos for insert to authenticated with check(user_id=auth.uid() and public.can_edit_controle(controle_id));
+drop policy if exists "orcamentos_update" on public.orcamentos; create policy "orcamentos_update" on public.orcamentos for update to authenticated using(public.can_edit_controle(controle_id)) with check(public.can_edit_controle(controle_id));
+drop policy if exists "orcamentos_delete" on public.orcamentos; create policy "orcamentos_delete" on public.orcamentos for delete to authenticated using(public.can_edit_controle(controle_id));
+drop policy if exists "recorrentes_select" on public.despesas_recorrentes; create policy "recorrentes_select" on public.despesas_recorrentes for select to authenticated using(public.can_access_controle(controle_id));
+drop policy if exists "recorrentes_insert" on public.despesas_recorrentes; create policy "recorrentes_insert" on public.despesas_recorrentes for insert to authenticated with check(user_id=auth.uid() and public.can_edit_controle(controle_id));
+drop policy if exists "recorrentes_update" on public.despesas_recorrentes; create policy "recorrentes_update" on public.despesas_recorrentes for update to authenticated using(public.can_edit_controle(controle_id)) with check(public.can_edit_controle(controle_id));
+drop policy if exists "recorrentes_delete" on public.despesas_recorrentes; create policy "recorrentes_delete" on public.despesas_recorrentes for delete to authenticated using(public.can_edit_controle(controle_id));
+drop policy if exists "rateios_select" on public.rateios; create policy "rateios_select" on public.rateios for select to authenticated using(public.can_access_controle(controle_id));
+drop policy if exists "rateios_insert" on public.rateios; create policy "rateios_insert" on public.rateios for insert to authenticated with check(user_id=auth.uid() and public.can_edit_controle(controle_id));
+drop policy if exists "rateios_update" on public.rateios; create policy "rateios_update" on public.rateios for update to authenticated using(public.can_edit_controle(controle_id)) with check(public.can_edit_controle(controle_id));
+drop policy if exists "rateios_delete" on public.rateios; create policy "rateios_delete" on public.rateios for delete to authenticated using(public.can_edit_controle(controle_id));

@@ -40,3 +40,6 @@
 
 /* v0.9 - ContaClara AI */
 .aiActions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 4px}.aiButton{border-color:var(--primary);color:var(--primary);font-weight:700}.aiBadge{font-size:12px;font-weight:700;padding:5px 9px;border-radius:999px;background:#eef6ff;color:#075fb8}.pixId{font-size:11px;color:#607087;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* v0.10 - Gestão financeira */
+.financeCards{margin-bottom:14px}.financeSection{margin-top:14px}.pendingList{display:grid;gap:9px}.pendingList>div{display:grid;grid-template-columns:44px 1fr;align-items:center;border-top:1px solid #edf1f6;padding:10px 0}.pendingList b{font-size:22px;color:var(--primary)}.pendingList span{color:#526477}.simpleList{display:grid;margin-top:18px}.simpleList>div{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;border-top:1px solid #edf1f6;padding:11px 0}.simpleList span b,.simpleList span small{display:block}.simpleList span small{color:#7b8999;margin-top:3px}.simpleList strong{white-space:nowrap}@media(max-width:600px){.simpleList>div{grid-template-columns:1fr auto}.simpleList .link{grid-column:1/-1;text-align:left}}
