@@ -590,3 +590,39 @@ create index if not exists ix_billing_checkout_pendente_lookup
   on public.billing_checkout_pendentes(plano_externo_id,pagador_email,status,updated_at desc);
 alter table public.billing_checkout_pendentes enable row level security;
 -- Sem policy para authenticated: leitura/escrita somente pelas rotas server-side com secret/service role.
+
+-- v0.15.0 - Conciliacao Bancaria (OFX/CSV + IA)
+create table if not exists public.transacoes_bancarias (
+  id uuid primary key default gen_random_uuid(),
+  organizacao_id uuid not null references public.organizacoes(id) on delete cascade,
+  controle_id uuid not null references public.controles(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  data date not null,
+  valor numeric(14,2) not null,
+  descricao text not null,
+  memo text,
+  tipo text,
+  identificador_externo text not null,
+  arquivo_origem text,
+  status_conciliacao text not null default 'pendente' check (status_conciliacao in ('pendente','conciliado','ignorado')),
+  despesa_sugerida_id uuid references public.despesas(id) on delete set null,
+  despesa_id uuid references public.despesas(id) on delete set null,
+  ia_confianca smallint check (ia_confianca between 0 and 100),
+  ia_categoria text,
+  ia_justificativa text,
+  conciliado_em timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint transacoes_bancarias_controle_externo_uk unique(controle_id,identificador_externo)
+);
+create index if not exists ix_transacoes_bancarias_controle_data on public.transacoes_bancarias(controle_id,data desc);
+create index if not exists ix_transacoes_bancarias_status on public.transacoes_bancarias(controle_id,status_conciliacao);
+alter table public.transacoes_bancarias enable row level security;
+drop policy if exists "transacoes_bancarias_select" on public.transacoes_bancarias;
+create policy "transacoes_bancarias_select" on public.transacoes_bancarias for select to authenticated using (public.can_access_controle(controle_id));
+drop policy if exists "transacoes_bancarias_insert" on public.transacoes_bancarias;
+create policy "transacoes_bancarias_insert" on public.transacoes_bancarias for insert to authenticated with check (auth.uid()=user_id and public.can_edit_controle(controle_id));
+drop policy if exists "transacoes_bancarias_update" on public.transacoes_bancarias;
+create policy "transacoes_bancarias_update" on public.transacoes_bancarias for update to authenticated using (public.can_edit_controle(controle_id)) with check (public.can_edit_controle(controle_id));
+drop policy if exists "transacoes_bancarias_delete" on public.transacoes_bancarias;
+create policy "transacoes_bancarias_delete" on public.transacoes_bancarias for delete to authenticated using (public.can_edit_controle(controle_id));
