@@ -1,34 +1,26 @@
-# ContaClaraAI v0.12.2 — Mercado Pago Hosted Subscription Checkout
+# ContaClaraAI v0.13.0 — Hotsite Comercial + Onboarding
 
-Correção do fluxo de assinatura recorrente. Planos associados do Mercado Pago exigem `card_token_id` quando a aplicação cria diretamente `/preapproval`. Esta versão não captura cartão no ContaClaraAI: consulta o `preapproval_plan`, obtém seu `init_point` e redireciona o usuário para o checkout hospedado do Mercado Pago.
+Baseada na v0.12.2.
 
-## Alterações
-- `/api/billing/checkout`: GET `/preapproval_plan/{id}` e retorno do `init_point`; não chama mais POST `/preapproval` sem cartão.
-- `billing_checkout_pendentes`: registra o vínculo workspace + usuário + plano + e-mail antes do redirecionamento.
-- `/api/billing/webhook`: continua relendo `/preapproval/{id}` no Mercado Pago e, quando não houver `external_reference`, resolve o workspace pelo checkout pendente.
-- O cartão permanece fora do ContaClaraAI.
+## Novidades
+- Hotsite público responsivo na raiz para usuários não autenticados.
+- Hero comercial, dores, recursos, passo a passo, planos e CTAs.
+- Login/cadastro acessíveis pelo hotsite.
+- Seleção de Free/Plus/Pro preservada durante o cadastro; após autenticar, planos pagos direcionam para Assinatura.
+- Onboarding em 3 passos para nomear workspace, escolher finalidade e nomear o primeiro controle.
+- Mantém toda a aplicação, Admin SaaS e checkout hospedado Mercado Pago da v0.12.2.
 
-## Banco
-Execute `supabase/schema.sql` no SQL Editor. A seção v0.12.2 é idempotente e cria `billing_checkout_pendentes`.
-
-## Variáveis
-Mantém as variáveis existentes:
-- `NEXT_PUBLIC_APP_URL`
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `MERCADOPAGO_ACCESS_TOKEN`
-- `MERCADOPAGO_PLUS_PLAN_ID`
-- `MERCADOPAGO_PRO_PLAN_ID`
+## Banco de dados
+Não há nova migration obrigatória na v0.13.0. O schema da v0.12.2 continua sendo a base.
 
 ## Publicação
-```powershell
+```bash
 npm install
 npm run build
 git add .
-git commit -m "Corrige checkout hospedado Mercado Pago v0.12.2"
+git commit -m "Implementa hotsite comercial e onboarding v0.13.0"
 git push origin main
 ```
 
-## Teste esperado
-Assinatura > Plus > Assinar com Mercado Pago deve abrir o checkout hospedado do Mercado Pago, em vez de retornar `card_token_id is required`. Após a autorização, o webhook consulta a assinatura na API oficial e atualiza o workspace.
+## Observação
+O onboarding usa um marcador local no navegador (`ccai_onboarding_done`) para não reaparecer após concluído/pulado. Uma evolução futura pode persistir esse estado por usuário no banco e adicionar telemetria de funil/UTM.
