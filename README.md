@@ -91,3 +91,19 @@ A criação passa a usar a RPC `criar_organizacao`, que obtém o proprietário d
 - Renomear uma pessoa atualiza o pagador das despesas vinculadas pelo nome anterior.
 - Exclusão é bloqueada quando existem despesas vinculadas, evitando perda de referência.
 - Execute `supabase/v0.15.3-gestao-pessoas.sql` antes do deploy.
+
+
+## v0.15.5 — Correção Dashboard / Quem mais pagou
+- Removeu valores fixos de Thais/Outros do placar.
+- Ranking calculado dinamicamente pelas despesas com status Pago do controle atual.
+- Agrupamento do pagador ignora diferenças de maiúsculas/minúsculas e espaços extras.
+- Exibe até os 5 maiores pagadores e barras proporcionais ao maior valor.
+- Despesas sem pagador não são atribuídas artificialmente a 'Outros'.
+- Não requer migration de banco.
+
+## v0.15.6 — Dashboard por Organização
+- O quadro **Quem mais pagou** agora consolida despesas pagas de todos os controles da organização selecionada.
+- A troca do controle atual não altera esse ranking; a troca da organização recalcula os dados.
+- O quadro identifica visualmente que o resultado é consolidado por organização.
+- Os demais indicadores do Dashboard continuam no escopo do controle atual nesta versão, evitando mudança silenciosa de semântica.
+- Não requer migration SQL.
